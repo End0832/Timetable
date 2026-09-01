@@ -4,20 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Emploi du temps</title>
-<meta name="theme-color" content="#0d1017">
+<meta name="theme-color" content="#f4f6fa">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg">
 <link rel="apple-touch-icon" href="icon.svg">
 <style>
 :root{
-  --bg:#0d1017;
-  --panel:#151a24;
-  --panel-2:#1b2130;
-  --line:#262d3d;
-  --text:#e8ebf2;
+  --bg:#f4f6fa;
+  --panel:#ffffff;
+  --panel-2:#eef1f7;
+  --line:#e2e6ee;
+  --text:#1a1d27;
   --sub:#8891a5;
-  --accent:#7c9eff;
-  --accent-2:#5ee6c4;
+  --accent:#5e7dff;
+  --accent-2:#1fae8e;
   --radius:18px;
   --radius-sm:10px;
   --gap:8px;
@@ -27,7 +27,7 @@ html,body{height:100%;}
 body{
   margin:0;
   font-family:"SF Pro Text",-apple-system,"Segoe UI",Roboto,Inter,sans-serif;
-  background:radial-gradient(1200px 800px at 80% -10%, #16203a 0%, var(--bg) 55%);
+  background:radial-gradient(1200px 800px at 80% -10%, #e8edfb 0%, var(--bg) 55%);
   color:var(--text);
   overflow:hidden;
   height:100vh;
@@ -38,7 +38,7 @@ body{
 #topbar{
   display:flex;align-items:center;gap:12px;
   padding:14px 18px;
-  background:rgba(21,26,36,.7);
+  background:rgba(255,255,255,.75);
   backdrop-filter:blur(14px);
   border-bottom:1px solid var(--line);
   flex:0 0 auto;
@@ -58,7 +58,7 @@ body{
   border:1px solid var(--line);
 }
 .btn:active{transform:scale(.94);}
-.btn.primary{background:linear-gradient(135deg,var(--accent),#5e7dff);color:#fff;border:none;}
+.btn.primary{background:linear-gradient(135deg,var(--accent),#7c9eff);color:#fff;border:none;}
 .btn.ghost{background:transparent;}
 .btn svg{width:16px;height:16px;}
 
@@ -136,13 +136,13 @@ body{
   left:3px;right:3px;
   border-radius:var(--radius-sm);
   padding:6px 8px;
-  color:#0d1017;
+  color:#1a1d27;
   font-size:11.5px;
   line-height:1.25;
   overflow:hidden;
   cursor:grab;
-  box-shadow:0 4px 14px rgba(0,0,0,.35);
-  border:1px solid rgba(255,255,255,.25);
+  box-shadow:0 4px 14px rgba(20,30,60,.12);
+  border:1px solid rgba(0,0,0,.08);
   touch-action:none;
   user-select:none;
 }
@@ -151,7 +151,7 @@ body{
 .block .wtag{
   position:absolute;top:4px;right:6px;
   font-size:9px;font-weight:800;
-  background:rgba(13,16,23,.25);
+  background:rgba(0,0,0,.12);
   border-radius:5px;padding:1px 4px;
 }
 .block .resize{
@@ -170,7 +170,7 @@ body{
 
 /* MODALS */
 .overlay{
-  position:fixed;inset:0;background:rgba(6,8,13,.6);
+  position:fixed;inset:0;background:rgba(30,35,50,.3);
   backdrop-filter:blur(6px);
   display:flex;align-items:center;justify-content:center;
   z-index:100;
