@@ -17,200 +17,175 @@
   --text:#1a1d27;
   --sub:#8891a5;
   --accent:#5e7dff;
-  --accent-2:#1fae8e;
-  --radius:18px;
+  --radius:16px;
   --radius-sm:10px;
-  --gap:8px;
+  --rowh:58px;
+  --timecolw:56px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;}
 body{
   margin:0;
   font-family:"SF Pro Text",-apple-system,"Segoe UI",Roboto,Inter,sans-serif;
-  background:radial-gradient(1200px 800px at 80% -10%, #e8edfb 0%, var(--bg) 55%);
+  background:var(--bg);
   color:var(--text);
   overflow:hidden;
   height:100vh;
   display:flex;
   flex-direction:column;
 }
-/* TOPBAR */
 #topbar{
-  display:flex;align-items:center;gap:12px;
-  padding:14px 18px;
-  background:rgba(255,255,255,.75);
-  backdrop-filter:blur(14px);
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;
+  background:rgba(255,255,255,.9);
   border-bottom:1px solid var(--line);
   flex:0 0 auto;
 }
-#topbar h1{font-size:17px;font-weight:600;margin:0;letter-spacing:.2px;color:var(--text);}
+#topbar h1{font-size:15px;font-weight:700;margin:0;}
 #topbar .spacer{flex:1;}
-.btn{
-  border:none;cursor:pointer;
-  background:var(--panel-2);
-  color:var(--text);
-  padding:10px 16px;
-  border-radius:999px;
-  font-size:14px;
-  font-weight:500;
-  display:flex;align-items:center;gap:6px;
-  transition:transform .15s ease, background .15s ease;
-  border:1px solid var(--line);
-}
-.btn:active{transform:scale(.94);}
-.btn.primary{background:linear-gradient(135deg,var(--accent),#7c9eff);color:#fff;border:none;}
-.btn.ghost{background:transparent;}
-.btn svg{width:16px;height:16px;}
-
-/* MAIN LAYOUT */
-#main{flex:1;display:flex;overflow:hidden;}
-#palette{
-  width:190px;flex:0 0 auto;
-  border-right:1px solid var(--line);
-  background:rgba(19,23,32,.6);
-  padding:14px 10px;
-  overflow-y:auto;
-}
-#palette h2{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--sub);margin:6px 6px 10px;font-weight:600;}
-.palette-item{
-  background:var(--panel-2);
-  border:1px solid var(--line);
-  border-radius:var(--radius-sm);
-  padding:10px 12px;
-  margin-bottom:8px;
-  cursor:grab;
-  font-size:13px;
-  font-weight:600;
-  display:flex;align-items:center;gap:8px;
-  touch-action:none;
-}
-.palette-item .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;}
-.palette-add{
-  width:100%;padding:10px;margin-top:4px;
-  border-radius:var(--radius-sm);
-  border:1px dashed var(--line);
-  background:transparent;color:var(--sub);
-  font-size:13px;cursor:pointer;
-}
-
-#gridwrap{flex:1;overflow:auto;padding:16px;position:relative;}
-#grid{
-  position:relative;
-  display:grid;
-  border-radius:var(--radius);
-  overflow:hidden;
-  border:1px solid var(--line);
-  background:var(--panel);
-  min-width:760px;
-}
-.hcell{
-  background:var(--panel-2);
-  color:var(--sub);
-  font-size:11.5px;
-  font-weight:600;
+.iconbtn{
+  border:none;cursor:pointer;background:var(--panel-2);color:var(--text);
+  width:38px;height:38px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
-  border-bottom:1px solid var(--line);
-  border-right:1px solid var(--line);
-  position:sticky;top:0;z-index:5;
-  padding:10px 4px;
+  font-size:16px;border:1px solid var(--line);
 }
-.corner{position:sticky;left:0;top:0;z-index:6;background:var(--panel-2);}
-.timecell{
-  background:var(--panel);
-  color:var(--sub);
-  font-size:11px;
-  text-align:right;
-  padding:2px 10px 0 0;
+.iconbtn:active{transform:scale(.92);}
+
+#scheduleWrap{flex:1;display:flex;overflow:hidden;position:relative;}
+#timeCol{
+  width:var(--timecolw);flex:0 0 auto;
+  background:var(--bg);
+  padding-top:34px;
   border-right:1px solid var(--line);
-  border-bottom:1px solid var(--line);
-  position:sticky;left:0;z-index:4;
+  overflow:hidden;
 }
-.daycol{
+.timeRow{
+  height:var(--rowh);
+  font-size:10.5px;color:var(--sub);font-weight:700;
+  text-align:right;padding-right:6px;padding-top:2px;
+}
+#board{flex:1;overflow:auto;position:relative;}
+#boardHeader{
+  display:flex;position:sticky;top:0;z-index:6;
+  background:rgba(244,246,250,.95);
+  border-bottom:1px solid var(--line);
+  height:34px;
+}
+.dayhead{
+  flex:1;min-width:130px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:var(--text);
   border-right:1px solid var(--line);
-  position:relative;
-  background:
-    repeating-linear-gradient(to bottom, transparent, transparent calc(var(--slotpx) - 1px), var(--line) calc(var(--slotpx) - 1px), var(--line) var(--slotpx));
+}
+#boardBody{position:relative;min-width:100%;}
+.rowline{
+  position:absolute;left:0;right:0;
+  border-top:1px solid var(--line);
+}
+.collabel{
+  position:absolute;top:0;bottom:0;
+  border-right:1px solid var(--line);
 }
 .block{
   position:absolute;
-  left:3px;right:3px;
   border-radius:var(--radius-sm);
-  padding:6px 8px;
+  padding:5px 7px;
   color:#1a1d27;
   font-size:11.5px;
   line-height:1.25;
   overflow:hidden;
   cursor:grab;
-  box-shadow:0 4px 14px rgba(20,30,60,.12);
+  box-shadow:0 2px 8px rgba(20,30,60,.10);
   border:1px solid rgba(0,0,0,.08);
   touch-action:none;
   user-select:none;
-}
-.block b{display:block;font-size:12.5px;font-weight:700;margin-bottom:1px;}
-.block .room{opacity:.75;font-weight:600;}
-.block .wtag{
-  position:absolute;top:4px;right:6px;
-  font-size:9px;font-weight:800;
-  background:rgba(0,0,0,.12);
-  border-radius:5px;padding:1px 4px;
-}
-.block .resize{
-  position:absolute;left:0;right:0;bottom:0;height:10px;
-  cursor:ns-resize;
-}
-.block.dragging{opacity:.75;z-index:50;box-shadow:0 10px 26px rgba(0,0,0,.5);}
-.ghost{
-  position:absolute;left:3px;right:3px;
-  border:2px dashed var(--accent-2);
-  border-radius:var(--radius-sm);
-  background:rgba(94,230,196,.08);
-  pointer-events:none;
   z-index:2;
 }
+.block b{display:block;font-size:12px;font-weight:700;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.block .room{opacity:.7;font-weight:600;font-size:10.5px;}
+.block .wtag{
+  position:absolute;top:3px;right:5px;
+  font-size:8.5px;font-weight:800;
+  background:rgba(0,0,0,.12);
+  border-radius:5px;padding:0px 4px;
+}
+.handle{
+  position:absolute;left:0;right:0;height:10px;
+  cursor:ns-resize;z-index:3;
+}
+.handle.top{top:-2px;}
+.handle.bottom{bottom:-2px;}
+.block.dragging{opacity:.8;z-index:50;box-shadow:0 8px 20px rgba(0,0,0,.2);}
 
-/* MODALS */
+#fabAdd{
+  position:absolute;right:18px;bottom:18px;z-index:20;
+  width:56px;height:56px;border-radius:50%;
+  background:var(--accent);color:#fff;border:none;
+  font-size:26px;box-shadow:0 6px 18px rgba(94,125,255,.4);cursor:pointer;
+}
+#fabAdd:active{transform:scale(.94);}
+#drawer{
+  position:absolute;right:0;bottom:0;top:0;
+  width:min(260px,80vw);
+  background:var(--panel);
+  border-left:1px solid var(--line);
+  box-shadow:-8px 0 24px rgba(0,0,0,.08);
+  transform:translateX(100%);
+  transition:transform .2s ease;
+  z-index:19;
+  padding:16px 12px;
+  overflow-y:auto;
+}
+#drawer.open{transform:translateX(0);}
+#drawer h2{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--sub);margin:4px 4px 10px;}
+.chip{
+  background:var(--panel-2);border:1px solid var(--line);border-radius:12px;
+  padding:9px 10px;margin-bottom:7px;font-size:12.5px;font-weight:600;
+  display:flex;align-items:center;gap:8px;cursor:grab;touch-action:none;
+}
+.chip .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;}
+.addchip{width:100%;padding:9px;border-radius:12px;border:1px dashed var(--line);background:transparent;color:var(--sub);font-size:12.5px;cursor:pointer;}
+.drawer-hint{font-size:11px;color:var(--sub);margin:10px 4px 0;line-height:1.4;}
+
 .overlay{
-  position:fixed;inset:0;background:rgba(30,35,50,.3);
-  backdrop-filter:blur(6px);
+  position:fixed;inset:0;background:rgba(30,35,50,.32);
   display:flex;align-items:center;justify-content:center;
-  z-index:100;
-  opacity:0;pointer-events:none;
-  transition:opacity .18s ease;
+  z-index:100;opacity:0;pointer-events:none;transition:opacity .16s ease;
 }
 .overlay.show{opacity:1;pointer-events:auto;}
 .sheet{
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:22px;
-  width:min(420px,92vw);
-  max-height:86vh;
-  overflow-y:auto;
-  padding:22px;
-  transform:translateY(14px) scale(.98);
-  transition:transform .18s ease;
+  background:var(--panel);border:1px solid var(--line);border-radius:20px;
+  width:min(400px,92vw);max-height:86vh;overflow-y:auto;padding:20px;
+  transform:translateY(10px) scale(.98);transition:transform .16s ease;
 }
 .overlay.show .sheet{transform:translateY(0) scale(1);}
-.sheet h3{margin:0 0 16px;font-size:17px;}
-.field{margin-bottom:14px;}
-.field label{display:block;font-size:12px;color:var(--sub);margin-bottom:6px;font-weight:600;}
-.field input[type=text],.field input[type=number],.field select{
-  width:100%;padding:11px 12px;border-radius:12px;
+.sheet h3{margin:0 0 14px;font-size:16px;}
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:11.5px;color:var(--sub);margin-bottom:5px;font-weight:600;}
+.field input[type=text],.field input[type=time],.field select{
+  width:100%;padding:10px 11px;border-radius:11px;
   border:1px solid var(--line);background:var(--panel-2);color:var(--text);font-size:14px;
 }
-.row2{display:flex;gap:10px;}
+.row2{display:flex;gap:8px;}
 .row2>.field{flex:1;}
-.swatches{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
-.swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
-.swatch.sel{border-color:#fff;}
-.seg{display:flex;background:var(--panel-2);border-radius:12px;padding:3px;border:1px solid var(--line);}
-.seg button{flex:1;border:none;background:transparent;color:var(--sub);padding:9px 0;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;}
+.swatches{display:flex;gap:7px;flex-wrap:wrap;margin-top:4px;}
+.swatch{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
+.swatch.sel{border-color:var(--text);}
+.seg{display:flex;background:var(--panel-2);border-radius:11px;padding:3px;border:1px solid var(--line);}
+.seg button{flex:1;border:none;background:transparent;color:var(--sub);padding:8px 0;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;}
 .seg button.active{background:var(--accent);color:#fff;}
-.sheet-actions{display:flex;gap:10px;margin-top:18px;}
+.sheet-actions{display:flex;gap:8px;margin-top:16px;}
 .sheet-actions .btn{flex:1;justify-content:center;}
-.danger{color:#ff8a8a;}
-hr.sep{border:none;border-top:1px solid var(--line);margin:18px 0;}
-.settings-list{display:flex;flex-direction:column;gap:10px;}
-.mini{font-size:12px;color:var(--sub);margin-top:4px;line-height:1.4;}
+.btn{border:none;cursor:pointer;background:var(--panel-2);color:var(--text);padding:10px 14px;border-radius:999px;font-size:13.5px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);}
+.btn:active{transform:scale(.96);}
+.btn.primary{background:var(--accent);color:#fff;border:none;}
+.danger{color:#d9534f;}
+hr.sep{border:none;border-top:1px solid var(--line);margin:16px 0;}
+.mini{font-size:11.5px;color:var(--sub);margin-top:4px;line-height:1.4;}
+.rowedit{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+.rowedit input[type=time]{flex:1;padding:8px;border-radius:9px;border:1px solid var(--line);background:var(--panel-2);font-size:13px;}
+.rowedit button{border:none;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;width:28px;height:28px;cursor:pointer;color:var(--sub);font-size:13px;flex:0 0 auto;}
+.daytoggle{display:inline-flex;border-radius:10px;padding:8px 10px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--line);margin:2px;}
 ::-webkit-scrollbar{width:8px;height:8px;}
 ::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px;}
 </style>
@@ -220,22 +195,24 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:18px 0;}
 <div id="topbar">
   <h1>Emploi du temps</h1>
   <div class="spacer"></div>
-  <button class="btn ghost" id="btnWeek">Semaine A</button>
-  <button class="btn" id="btnSettings">⚙ Réglages</button>
+  <button class="iconbtn" id="btnSettings" title="Réglages">⚙</button>
 </div>
 
-<div id="main">
-  <div id="palette">
-    <h2>Cours à placer</h2>
+<div id="scheduleWrap">
+  <div id="timeCol"></div>
+  <div id="board">
+    <div id="boardHeader"></div>
+    <div id="boardBody"></div>
+  </div>
+  <button id="fabAdd" title="Ajouter un cours">+</button>
+  <div id="drawer">
+    <h2>Cours</h2>
     <div id="paletteList"></div>
-    <button class="palette-add" id="btnNewCourse">+ Nouveau cours</button>
-  </div>
-  <div id="gridwrap">
-    <div id="grid"></div>
+    <button class="addchip" id="btnNewCourse">+ Nouveau cours</button>
+    <p class="drawer-hint">Glisse un cours sur la grille pour le placer. Tape dessus pour le modifier.</p>
   </div>
 </div>
 
-<!-- Edit block sheet -->
 <div class="overlay" id="editOverlay">
   <div class="sheet">
     <h3 id="editTitle">Modifier le cours</h3>
@@ -257,7 +234,7 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:18px 0;}
       <label>Couleur</label>
       <div class="swatches" id="swatches"></div>
     </div>
-    <div class="field">
+    <div class="field" id="weekField">
       <label>Semaine</label>
       <div class="seg" id="weekSeg">
         <button data-v="all" class="active">Toutes</button>
@@ -266,53 +243,29 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:18px 0;}
       </div>
     </div>
     <div class="sheet-actions">
-      <button class="btn ghost danger" id="btnDelete">Supprimer</button>
+      <button class="btn danger" id="btnDelete">Supprimer</button>
       <button class="btn primary" id="btnSave">Enregistrer</button>
     </div>
   </div>
 </div>
 
-<!-- Settings sheet -->
 <div class="overlay" id="settingsOverlay">
   <div class="sheet">
     <h3>Réglages</h3>
-    <div class="settings-list">
-      <div class="row2">
-        <div class="field">
-          <label>Heure de début</label>
-          <input type="number" id="sStart" min="0" max="23" value="8">
-        </div>
-        <div class="field">
-          <label>Heure de fin</label>
-          <input type="number" id="sEnd" min="1" max="24" value="18">
-        </div>
-      </div>
-      <div class="field">
-        <label>Pas de la grille (minutes)</label>
-        <select id="sStep">
-          <option value="15">15 min</option>
-          <option value="30" selected>30 min</option>
-          <option value="60">60 min</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Jours affichés</label>
-        <div class="swatches" id="dayToggles"></div>
-      </div>
-    </div>
+    <label style="font-size:11.5px;color:var(--sub);font-weight:600;">Jours affichés</label>
+    <div id="dayToggles" style="margin:8px 0 16px;"></div>
+    <label style="font-size:11.5px;color:var(--sub);font-weight:600;">Créneaux horaires (définis à la main)</label>
+    <div id="rowsEditor" style="margin-top:8px;"></div>
+    <button class="addchip" id="btnAddRow" style="margin-top:4px;">+ Ajouter un créneau</button>
     <hr class="sep">
-    <div class="field">
-      <button class="btn primary" style="width:100%;justify-content:center" id="btnApplySettings">Appliquer la grille</button>
-    </div>
+    <button class="btn primary" style="width:100%;" id="btnApplySettings">Appliquer</button>
     <hr class="sep">
-    <div class="settings-list">
-      <button class="btn" style="width:100%;justify-content:center" id="btnSaveDefault">💾 Définir comme emploi du temps de base</button>
-      <button class="btn" style="width:100%;justify-content:center" id="btnLoadDefault">↺ Recharger l'emploi du temps de base</button>
-      <button class="btn ghost danger" style="width:100%;justify-content:center" id="btnClear">Effacer la grille actuelle</button>
-    </div>
-    <p class="mini">L'emploi du temps actif est sauvegardé automatiquement sur cette tablette. « Emploi du temps de base » sert de sauvegarde de référence, rechargeable à tout moment.</p>
+    <button class="btn" style="width:100%;margin-bottom:8px;" id="btnSaveDefault">💾 Définir comme emploi du temps de base</button>
+    <button class="btn" style="width:100%;margin-bottom:8px;" id="btnLoadDefault">↺ Recharger l'emploi du temps de base</button>
+    <button class="btn danger" style="width:100%;" id="btnClear">Effacer la grille actuelle</button>
+    <p class="mini">Sauvegarde automatique sur cette tablette.</p>
     <div class="sheet-actions">
-      <button class="btn primary" style="width:100%;justify-content:center" id="btnCloseSettings">Fermer</button>
+      <button class="btn primary" style="width:100%;" id="btnCloseSettings">Fermer</button>
     </div>
   </div>
 </div>
