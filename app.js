@@ -1,8 +1,9 @@
 /* ===== Emploi du temps — logique ===== */
-const LS_ACTIVE='edt_active_v2', LS_DEFAULT='edt_default_v2';
-const ROWH=58, HEADH=34;
+const LS_ACTIVE='edt_active_v3', LS_DEFAULT='edt_default_v3';
 const COLORS=['#7ED9A6','#E38FC5','#D9CB6A','#7EC8E3','#A99BE8','#C9CDD6','#8E7FE0','#4E6FC0','#F0A868','#DDE1EA'];
 const ALLDAYS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+const HEADH=34;
+let ROWH=58; // recalculé dynamiquement pour éviter le scroll
 
 function defaultRows(){
   return [
@@ -29,41 +30,9 @@ function defaultTemplates(){
     {id:'t12',subject:'ACCOMPAGNEMENT PERSO.',teacher:'',room:'Salle 109',color:'#C7B8F0'},
   ];
 }
-function defaultBlocks(){
-  let n=1; const id=()=>'b'+(n++);
-  return [
-    {id:id(),day:0,rowStart:0,rowSpan:2,week:'all',subject:'HGGSP',teacher:'Sokhn S.',room:'Salle 112',color:'#DDE1EA'},
-    {id:id(),day:0,rowStart:3,rowSpan:1,week:'all',subject:'FRANCAIS',teacher:'Dubois A.',room:'Salle 109',color:'#7ED9A6'},
-    {id:id(),day:0,rowStart:4,rowSpan:1,week:'all',subject:'HISTOIRE-GEOGRAPHIE',teacher:'Menanteau F.',room:'Salle 109',color:'#E38FC5'},
-    {id:id(),day:0,rowStart:8,rowSpan:1,week:'all',subject:'HISTOIRE-GEOGRAPHIE',teacher:'Menanteau F.',room:'Salle 109',color:'#E38FC5'},
-    {id:id(),day:1,rowStart:0,rowSpan:2,week:'all',subject:'HGGSP',teacher:'Sokhn S.',room:'Salle 108',color:'#DDE1EA'},
-    {id:id(),day:1,rowStart:3,rowSpan:1,week:'all',subject:'PH-CH',teacher:'Condette A.',room:'Labo Ampère 002',color:'#D9CB6A'},
-    {id:id(),day:1,rowStart:6,rowSpan:1,week:'A',subject:'RENFORCEMENT LINGUISTIQUE',teacher:'Wainstein N.',room:'Salle 109',color:'#C9CDD6'},
-    {id:id(),day:1,rowStart:6,rowSpan:1,week:'B',subject:'FRANCAIS',teacher:'Dubois A.',room:'Salle 109',color:'#7ED9A6'},
-    {id:id(),day:1,rowStart:7,rowSpan:1,week:'A',subject:'ENS. MORAL & CIVIQUE',teacher:'Allard M.',room:'Salle 109',color:'#E38FC5'},
-    {id:id(),day:1,rowStart:7,rowSpan:1,week:'B',subject:'AGL1',teacher:'Wainstein N.',room:'Salle 109',color:'#C9CDD6'},
-    {id:id(),day:1,rowStart:8,rowSpan:1,week:'all',subject:'ENSSCI',teacher:'Allard M.',room:'Salle 109',color:'#A99BE8'},
-    {id:id(),day:1,rowStart:10,rowSpan:1,week:'A',subject:'FRANCAIS',teacher:'Dubois A.',room:'Salle 109',color:'#7ED9A6'},
-    {id:id(),day:2,rowStart:0,rowSpan:1,week:'all',subject:'ENSSCI',teacher:'Condette A.',room:'Salle 109',color:'#A99BE8'},
-    {id:id(),day:2,rowStart:1,rowSpan:1,week:'all',subject:'FRANCAIS',teacher:'Dubois A.',room:'Salle 109',color:'#7ED9A6'},
-    {id:id(),day:2,rowStart:3,rowSpan:2,week:'all',subject:'ED.PHYSIQUE & SPORTIVE',teacher:'Talleu L.',room:'Salle EPS',color:'#7EC8E3'},
-    {id:id(),day:2,rowStart:6,rowSpan:3,week:'all',subject:'DEVOIR SURVEILLE',teacher:'N. Barre VS L.',room:'Salle 001',color:'#8E7FE0'},
-    {id:id(),day:2,rowStart:9,rowSpan:2,week:'all',subject:'HISTOIRE-GEOGRAPHIE',teacher:'Menanteau F.',room:'Salle 109',color:'#E38FC5'},
-    {id:id(),day:3,rowStart:0,rowSpan:2,week:'all',subject:'PH-CH',teacher:'Condette A.',room:'Labo Lavoisier 003',color:'#D9CB6A'},
-    {id:id(),day:3,rowStart:4,rowSpan:1,week:'all',subject:'FRANCAIS',teacher:'Dubois A.',room:'Salle 109',color:'#7ED9A6'},
-    {id:id(),day:3,rowStart:6,rowSpan:1,week:'A',subject:'AGL1',teacher:'Wainstein N.',room:'Salle 109',color:'#C9CDD6'},
-    {id:id(),day:3,rowStart:6,rowSpan:1,week:'B',subject:'ACCOMPAGNEMENT PERSO.',teacher:'Dubois A.',room:'Salle 109',color:'#C7B8F0'},
-    {id:id(),day:3,rowStart:7,rowSpan:2,week:'all',subject:'MATHS SPE',teacher:'Grimonprez M.',room:'Salle 208',color:'#DDE1EA'},
-    {id:id(),day:3,rowStart:8,rowSpan:3,week:'all',subject:'ALLEMAND LV2',teacher:'Halit A.',room:'Salle 114',color:'#4E6FC0'},
-    {id:id(),day:4,rowStart:0,rowSpan:1,week:'B',subject:'ACCOMPAGNEMENT PERSO.',teacher:'Condette A.',room:'',color:'#C7B8F0'},
-    {id:id(),day:4,rowStart:1,rowSpan:1,week:'all',subject:'AGL1',teacher:'Wainstein N.',room:'Salle 109',color:'#C9CDD6'},
-    {id:id(),day:4,rowStart:3,rowSpan:1,week:'all',subject:'AGL1',teacher:'Wainstein N.',room:'Salle 109',color:'#C9CDD6'},
-    {id:id(),day:4,rowStart:4,rowSpan:1,week:'all',subject:'ANGLAIS LV SECTION',teacher:'Manzah A.',room:'Salle 109',color:'#D98FC0'},
-    {id:id(),day:4,rowStart:7,rowSpan:2,week:'all',subject:'MATHS SPE',teacher:'Grimonprez M.',room:'Salle 207',color:'#DDE1EA'},
-  ];
-}
+// L'unité de placement/redimensionnement est le DEMI-créneau : rowStart/rowSpan sont exprimés en demi-créneaux.
 function defaultState(){
-  return {config:{days:['Lundi','Mardi','Mercredi','Jeudi','Vendredi'],rows:defaultRows()},templates:defaultTemplates(),blocks:defaultBlocks()};
+  return {config:{days:['Lundi','Mardi','Mercredi','Jeudi','Vendredi'],rows:defaultRows()},templates:defaultTemplates(),blocks:[]};
 }
 function load(k){try{const r=localStorage.getItem(k);return r?JSON.parse(r):null;}catch(e){return null;}}
 function save(k,v){localStorage.setItem(k,JSON.stringify(v));}
@@ -74,6 +43,7 @@ function esc(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':
 let state = load(LS_ACTIVE) || (()=>{const s=defaultState();save(LS_ACTIVE,s);return s;})();
 
 /* ===== RENDER ===== */
+const scheduleWrap=document.getElementById('scheduleWrap');
 const timeCol=document.getElementById('timeCol');
 const board=document.getElementById('board');
 const boardHeader=document.getElementById('boardHeader');
@@ -81,25 +51,52 @@ const boardBody=document.getElementById('boardBody');
 
 function nRows(){return state.config.rows.length;}
 function nDays(){return state.config.days.length;}
+function nUnits(){return nRows()*2;} // demi-créneaux
+function unitPx(){return ROWH/2;}
+
+function computeRowH(){
+  const availH = scheduleWrap.clientHeight - HEADH;
+  ROWH = Math.max(24, Math.floor(availH / Math.max(1,nRows())));
+}
+
+function clusterDayBlocks(dayBlocks){
+  const parent=dayBlocks.map((_,i)=>i);
+  function find(x){return parent[x]===x?x:(parent[x]=find(parent[x]));}
+  function union(a,b){parent[find(a)]=find(b);}
+  for(let i=0;i<dayBlocks.length;i++)for(let j=i+1;j<dayBlocks.length;j++){
+    const a=dayBlocks[i],b=dayBlocks[j];
+    if(a.rowStart<b.rowStart+b.rowSpan && b.rowStart<a.rowStart+a.rowSpan) union(i,j);
+  }
+  const groups={};
+  dayBlocks.forEach((b,i)=>{const r=find(i);(groups[r]=groups[r]||[]).push(b);});
+  return Object.values(groups);
+}
+function assignColumns(group){
+  if(group.length===1) return [{b:group[0],col:0,cols:1}];
+  const As=group.filter(b=>b.week==='A');
+  const Bs=group.filter(b=>b.week==='B');
+  const others=group.filter(b=>b.week!=='A'&&b.week!=='B');
+  const ordered=[...As,...others,...Bs];
+  const cols=ordered.length;
+  return ordered.map((b,idx)=>({b,col:idx,cols}));
+}
 
 function renderAll(){
+  computeRowH();
   const rows=state.config.rows, days=state.config.days;
-  // time column
   timeCol.innerHTML='';
   rows.forEach(r=>{
     const d=document.createElement('div');
-    d.className='timeRow';
+    d.className='timeRow'; d.style.height=ROWH+'px'; d.style.lineHeight=(ROWH<40?ROWH+'px':'14px');
     d.textContent=r.start;
     timeCol.appendChild(d);
   });
-  // header
   boardHeader.innerHTML='';
   days.forEach(dname=>{
     const h=document.createElement('div');
     h.className='dayhead'; h.textContent=dname;
     boardHeader.appendChild(h);
   });
-  // body
   boardBody.style.height=(rows.length*ROWH)+'px';
   boardBody.innerHTML='';
   for(let i=0;i<=rows.length;i++){
@@ -112,25 +109,30 @@ function renderAll(){
     l.className='collabel'; l.style.left=(i*100/days.length)+'%';
     boardBody.appendChild(l);
   }
-  // blocks per day with overlap columns
+  const highlight=document.createElement('div');
+  highlight.id='dragHighlight';
+  highlight.style.cssText='position:absolute;display:none;background:rgba(94,125,255,.12);border:2px dashed var(--accent);border-radius:8px;pointer-events:none;z-index:1;';
+  boardBody.appendChild(highlight);
+
   for(let di=0; di<days.length; di++){
     const dayBlocks = state.blocks.filter(b=>b.day===di).sort((a,b)=>a.rowStart-b.rowStart);
-    const cols=[]; // array of {end} last occupied row-end per column
-    const assigned=[];
-    dayBlocks.forEach(b=>{
-      let ci=cols.findIndex(c=>c<=b.rowStart);
-      if(ci===-1){ci=cols.length;cols.push(b.rowStart+b.rowSpan);} else {cols[ci]=b.rowStart+b.rowSpan;}
-      assigned.push({b,ci});
-    });
-    // determine total concurrent columns needed per block (max overlap at its range) -> use simple: total columns = max ci+1 among blocks overlapping it
-    assigned.forEach(({b,ci})=>{
-      // find blocks overlapping b to know total columns in this cluster
-      const overlapping = assigned.filter(o=> o.b.rowStart < b.rowStart+b.rowSpan && b.rowStart < o.b.rowStart+o.b.rowSpan);
-      const totalCols = Math.max(...overlapping.map(o=>o.ci))+1;
-      renderBlock(b, di, ci, totalCols, days.length);
+    clusterDayBlocks(dayBlocks).forEach(group=>{
+      assignColumns(group).forEach(({b,col,cols})=>renderBlock(b,di,col,cols,days.length));
     });
   }
 }
+
+function showHighlight(day,rowStartUnits,rowSpanUnits,totalDays){
+  const hl=document.getElementById('dragHighlight');
+  if(!hl) return;
+  const dayW=100/totalDays;
+  hl.style.display='block';
+  hl.style.left='calc('+(day*dayW)+'% + 2px)';
+  hl.style.width='calc('+dayW+'% - 4px)';
+  hl.style.top=(rowStartUnits*unitPx())+'px';
+  hl.style.height=(rowSpanUnits*unitPx())+'px';
+}
+function hideHighlight(){ const hl=document.getElementById('dragHighlight'); if(hl) hl.style.display='none'; }
 
 function renderBlock(b, dayIndex, colIndex, totalCols, totalDays){
   const dayW=100/totalDays;
@@ -142,9 +144,10 @@ function renderBlock(b, dayIndex, colIndex, totalCols, totalDays){
   el.style.background=b.color;
   el.style.left='calc('+left+'% + 2px)';
   el.style.width='calc('+w+'% - 4px)';
-  el.style.top=(b.rowStart*ROWH+2)+'px';
-  el.style.height=(b.rowSpan*ROWH-4)+'px';
-  el.innerHTML=`<b>${esc(b.subject||'Cours')}</b>${b.teacher?`<div>${esc(b.teacher)}</div>`:''}${b.room?`<div class="room">${esc(b.room)}</div>`:''}${b.week!=='all'?`<span class="wtag">${b.week}</span>`:''}<div class="handle top"></div><div class="handle bottom"></div>`;
+  el.style.top=(b.rowStart*unitPx()+2)+'px';
+  el.style.height=(b.rowSpan*unitPx()-4)+'px';
+  const small = ROWH<44;
+  el.innerHTML=`<b style="${small?'font-size:10.5px;':''}">${esc(b.subject||'Cours')}</b>${(!small&&b.teacher)?`<div>${esc(b.teacher)}</div>`:''}${(!small&&b.room)?`<div class="room">${esc(b.room)}</div>`:''}${b.week!=='all'?`<span class="wtag">${b.week}</span>`:''}<div class="handle top"></div><div class="handle bottom"></div>`;
   boardBody.appendChild(el);
   attachBlockInteractions(el,b);
 }
@@ -154,7 +157,6 @@ function getMetrics(){
   const rect=boardBody.getBoundingClientRect();
   return {rect, colW:rect.width/nDays()};
 }
-function clampRowStart(v){return Math.max(0,Math.min(nRows()-1,v));}
 function clampDay(v){return Math.max(0,Math.min(nDays()-1,v));}
 
 function attachBlockInteractions(el,b){
@@ -171,30 +173,34 @@ function attachBlockInteractions(el,b){
     function onMove(ev){
       const dx=ev.clientX-startX, dy=ev.clientY-startY;
       if(Math.abs(dx)>4||Math.abs(dy)>4) moved=true;
-      const dRow=Math.round(dy/ROWH);
+      const dUnit=Math.round(dy/unitPx());
+      let day=b.day, rowStart=b.rowStart, rowSpan=b.rowSpan;
       if(kind==='move'){
         const dDay=Math.round(dx/colW);
-        b.day=clampDay(origDay+dDay);
-        b.rowStart=Math.max(0,Math.min(nRows()-origSpan, origStart+dRow));
-        el.style.top=(b.rowStart*ROWH+2)+'px';
+        day=clampDay(origDay+dDay);
+        rowStart=Math.max(0,Math.min(nUnits()-origSpan, origStart+dUnit));
+        rowSpan=origSpan;
       } else if(kind==='top'){
-        let newStart=Math.max(0, Math.min(origStart+origSpan-1, origStart+dRow));
-        b.rowStart=newStart; b.rowSpan=origSpan+(origStart-newStart);
-        el.style.top=(b.rowStart*ROWH+2)+'px';
-        el.style.height=(b.rowSpan*ROWH-4)+'px';
+        rowStart=Math.max(0, Math.min(origStart+origSpan-1, origStart+dUnit));
+        rowSpan=origSpan+(origStart-rowStart);
+        day=origDay;
       } else {
-        let newSpan=Math.max(1, Math.min(nRows()-origStart, origSpan+dRow));
-        b.rowSpan=newSpan;
-        el.style.height=(b.rowSpan*ROWH-4)+'px';
+        rowSpan=Math.max(1, Math.min(nUnits()-origStart, origSpan+dUnit));
+        rowStart=origStart; day=origDay;
       }
+      b.day=day; b.rowStart=rowStart; b.rowSpan=rowSpan;
+      showHighlight(day,rowStart,rowSpan,nDays());
+      el.style.top=(rowStart*unitPx()+2)+'px';
+      el.style.height=(rowSpan*unitPx()-4)+'px';
     }
     function onUp(){
       document.removeEventListener('pointermove',onMove);
       document.removeEventListener('pointerup',onUp);
       el.classList.remove('dragging');
+      hideHighlight();
       persist();
       if(!moved && kind==='move'){ openEditBlock(b); }
-      else { renderAll(); }
+      renderAll();
     }
     document.addEventListener('pointermove',onMove);
     document.addEventListener('pointerup',onUp);
@@ -229,23 +235,33 @@ function attachPaletteDrag(el,tmpl){
       if(!dragging && (Math.abs(ev.clientX-startX)>6||Math.abs(ev.clientY-startY)>6)){
         dragging=true;
         ghost=document.createElement('div');
-        ghost.style.cssText='position:fixed;width:150px;height:'+ROWH+'px;border-radius:10px;padding:6px 8px;font-size:12px;font-weight:700;z-index:999;pointer-events:none;box-shadow:0 8px 20px rgba(0,0,0,.25);background:'+tmpl.color+';color:#1a1d27;';
+        ghost.style.cssText='position:fixed;width:150px;height:'+(ROWH*2)+'px;border-radius:10px;padding:6px 8px;font-size:12px;font-weight:700;z-index:999;pointer-events:none;box-shadow:0 8px 20px rgba(0,0,0,.25);background:'+tmpl.color+';color:#1a1d27;opacity:.9;';
         ghost.textContent=tmpl.subject;
         document.body.appendChild(ghost);
         drawer.classList.remove('open');
       }
-      if(dragging && ghost){ ghost.style.left=(ev.clientX-75)+'px'; ghost.style.top=(ev.clientY-20)+'px'; }
+      if(dragging && ghost){
+        ghost.style.left=(ev.clientX-75)+'px'; ghost.style.top=(ev.clientY-20)+'px';
+        const {rect,colW}=getMetrics();
+        const x=ev.clientX-rect.left, y=ev.clientY-rect.top;
+        if(x>=0&&y>=0&&x<rect.width&&y<rect.height){
+          const day=clampDay(Math.floor(x/colW));
+          const rowStart=Math.max(0,Math.min(nUnits()-2,Math.round(y/unitPx())));
+          showHighlight(day,rowStart,2,nDays());
+        } else hideHighlight();
+      }
     }
     function onUp(ev){
       document.removeEventListener('pointermove',onMove);
       document.removeEventListener('pointerup',onUp);
+      hideHighlight();
       if(dragging && ghost){
         const {rect,colW}=getMetrics();
         const x=ev.clientX-rect.left, y=ev.clientY-rect.top;
         if(x>=0 && y>=0 && x<rect.width && y<rect.height){
           const day=clampDay(Math.floor(x/colW));
-          const rowStart=clampRowStart(Math.floor(y/ROWH));
-          state.blocks.push({id:uid(),day,rowStart,rowSpan:1,week:'all',subject:tmpl.subject,teacher:tmpl.teacher,room:tmpl.room,color:tmpl.color});
+          const rowStart=Math.max(0,Math.min(nUnits()-2,Math.round(y/unitPx())));
+          state.blocks.push({id:uid(),day,rowStart,rowSpan:2,week:'all',subject:tmpl.subject,teacher:tmpl.teacher,room:tmpl.room,color:tmpl.color});
           persist(); renderAll();
         }
         ghost.remove();
