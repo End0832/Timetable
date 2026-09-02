@@ -1,38 +1,14 @@
 /* ===== Emploi du temps — logique ===== */
-const LS_ACTIVE='edt_active_v3', LS_DEFAULT='edt_default_v3';
+const LS_ACTIVE='edt_active_v4', LS_DEFAULT='edt_default_v4';
 const COLORS=['#7ED9A6','#E38FC5','#D9CB6A','#7EC8E3','#A99BE8','#C9CDD6','#8E7FE0','#4E6FC0','#F0A868','#DDE1EA'];
 const ALLDAYS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+const ALPHABET='ABCDEFGHIJ';
 const HEADH=34;
-let ROWH=58; // recalculé dynamiquement pour éviter le scroll
+let ROWH=58;
+let currentFilter='all'; // 'all' | 'A' | 'B' ...
 
-function defaultRows(){
-  return [
-    {start:'07:55',end:'08:50'},{start:'08:50',end:'09:45'},{start:'09:45',end:'10:00'},
-    {start:'10:00',end:'10:55'},{start:'10:55',end:'11:50'},{start:'11:50',end:'12:45'},
-    {start:'12:45',end:'13:40'},{start:'13:40',end:'14:35'},{start:'14:35',end:'15:30'},
-    {start:'15:30',end:'15:45'},{start:'15:45',end:'16:40'},{start:'16:40',end:'17:35'},
-    {start:'17:35',end:'18:30'},
-  ];
-}
-function defaultTemplates(){
-  return [
-    {id:'t1',subject:'HGGSP',teacher:'Sokhn S.',room:'',color:'#DDE1EA'},
-    {id:'t2',subject:'FRANCAIS',teacher:'Dubois A.',room:'Salle 109',color:'#7ED9A6'},
-    {id:'t3',subject:'HISTOIRE-GEOGRAPHIE',teacher:'Menanteau F.',room:'Salle 109',color:'#E38FC5'},
-    {id:'t4',subject:'PH-CH',teacher:'Condette A.',room:'',color:'#D9CB6A'},
-    {id:'t5',subject:'ED.PHYSIQUE & SPORTIVE',teacher:'Talleu L.',room:'Salle EPS',color:'#7EC8E3'},
-    {id:'t6',subject:'ENSSCI',teacher:'',room:'Salle 109',color:'#A99BE8'},
-    {id:'t7',subject:'AGL1',teacher:'Wainstein N.',room:'Salle 109',color:'#C9CDD6'},
-    {id:'t8',subject:'ANGLAIS LV SECTION',teacher:'Manzah A.',room:'Salle 109',color:'#D98FC0'},
-    {id:'t9',subject:'DEVOIR SURVEILLE',teacher:'N. Barre VS L.',room:'Salle 001',color:'#8E7FE0'},
-    {id:'t10',subject:'MATHS SPE',teacher:'Grimonprez M.',room:'',color:'#DDE1EA'},
-    {id:'t11',subject:'ALLEMAND LV2',teacher:'Halit A.',room:'Salle 114',color:'#4E6FC0'},
-    {id:'t12',subject:'ACCOMPAGNEMENT PERSO.',teacher:'',room:'Salle 109',color:'#C7B8F0'},
-  ];
-}
-// L'unité de placement/redimensionnement est le DEMI-créneau : rowStart/rowSpan sont exprimés en demi-créneaux.
 function defaultState(){
-  return {config:{days:['Lundi','Mardi','Mercredi','Jeudi','Vendredi'],rows:defaultRows()},templates:defaultTemplates(),blocks:[]};
+  return {config:{days:['Lundi','Mardi','Mercredi','Jeudi','Vendredi'],rows:[]},templates:[],blocks:[]};
 }
 function load(k){try{const r=localStorage.getItem(k);return r?JSON.parse(r):null;}catch(e){return null;}}
 function save(k,v){localStorage.setItem(k,JSON.stringify(v));}
@@ -51,8 +27,10 @@ const boardBody=document.getElementById('boardBody');
 
 function nRows(){return state.config.rows.length;}
 function nDays(){return state.config.days.length;}
-function nUnits(){return nRows()*2;} // demi-créneaux
+function nUnits(){return nRows()*2;}
 function unitPx(){return ROWH/2;}
+function globalLetters(){return [...new Set(state.blocks.map(b=>b.week).filter(w=>w && w!=='all'))].sort();}
+function nextLetter(used){for(const c of ALPHABET) if(!used.has(c)) return c; return 'Z';}
 
 function computeRowH(){
   const availH = scheduleWrap.clientHeight - HEADH;
@@ -71,34 +49,39 @@ function clusterDayBlocks(dayBlocks){
   dayBlocks.forEach((b,i)=>{const r=find(i);(groups[r]=groups[r]||[]).push(b);});
   return Object.values(groups);
 }
-function assignColumns(group){
-  if(group.length===1) return [{b:group[0],col:0,cols:1}];
-  const As=group.filter(b=>b.week==='A');
-  const Bs=group.filter(b=>b.week==='B');
-  const others=group.filter(b=>b.week!=='A'&&b.week!=='B');
-  const ordered=[...As,...others,...Bs];
-  const cols=ordered.length;
-  return ordered.map((b,idx)=>({b,col:idx,cols}));
-}
 
 function renderAll(){
   computeRowH();
   const rows=state.config.rows, days=state.config.days;
   timeCol.innerHTML='';
-  rows.forEach(r=>{
-    const d=document.createElement('div');
-    d.className='timeRow'; d.style.height=ROWH+'px'; d.style.lineHeight=(ROWH<40?ROWH+'px':'14px');
-    d.textContent=r.start;
-    timeCol.appendChild(d);
-  });
   boardHeader.innerHTML='';
   days.forEach(dname=>{
     const h=document.createElement('div');
     h.className='dayhead'; h.textContent=dname;
     boardHeader.appendChild(h);
   });
-  boardBody.style.height=(rows.length*ROWH)+'px';
   boardBody.innerHTML='';
+
+  if(rows.length===0){
+    boardBody.style.height='100%';
+    const msg=document.createElement('div');
+    msg.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--sub);font-size:13px;text-align:center;padding:20px;';
+    msg.textContent="Aucun créneau défini. Ouvre les réglages (⚙) pour en ajouter.";
+    boardBody.appendChild(msg);
+    updateFilterBtn();
+    return;
+  }
+
+  rows.forEach((r,i)=>{
+    const d=document.createElement('div');
+    d.className='timeRow'; d.style.height=ROWH+'px';
+    const gap = i>0 && rows[i-1].end !== r.start;
+    if(gap){ d.innerHTML=`<div style="line-height:1.15">${rows[i-1].end}<br>${r.start}</div>`; }
+    else { d.style.lineHeight=(ROWH<40?ROWH+'px':'14px'); d.textContent=r.start; }
+    timeCol.appendChild(d);
+  });
+
+  boardBody.style.height=(rows.length*ROWH)+'px';
   for(let i=0;i<=rows.length;i++){
     const l=document.createElement('div');
     l.className='rowline'; l.style.top=(i*ROWH)+'px';
@@ -114,13 +97,53 @@ function renderAll(){
   highlight.style.cssText='position:absolute;display:none;background:rgba(94,125,255,.12);border:2px dashed var(--accent);border-radius:8px;pointer-events:none;z-index:1;';
   boardBody.appendChild(highlight);
 
+  const letters=globalLetters();
+
   for(let di=0; di<days.length; di++){
-    const dayBlocks = state.blocks.filter(b=>b.day===di).sort((a,b)=>a.rowStart-b.rowStart);
-    clusterDayBlocks(dayBlocks).forEach(group=>{
-      assignColumns(group).forEach(({b,col,cols})=>renderBlock(b,di,col,cols,days.length));
-    });
+    let dayBlocks = state.blocks.filter(b=>b.day===di);
+    if(currentFilter!=='all') dayBlocks = dayBlocks.filter(b=> b.week==='all' || b.week===currentFilter);
+    dayBlocks.sort((a,b)=>a.rowStart-b.rowStart);
+
+    if(currentFilter!=='all'){
+      // vue filtrée : chaque bloc prend toute la largeur
+      dayBlocks.forEach(b=>renderBlock(b,di,0,1,days.length));
+      continue;
+    }
+
+    if(letters.length===0){
+      clusterDayBlocks(dayBlocks).forEach(group=>{
+        group.forEach((b,i)=>renderBlock(b,di,i,group.length,days.length));
+      });
+    } else {
+      const cols=letters.length;
+      clusterDayBlocks(dayBlocks).forEach(group=>{
+        const used=new Set();
+        group.filter(b=>b.week!=='all').forEach(b=>used.add(letters.indexOf(b.week)));
+        let free=0;
+        group.forEach(b=>{
+          let col;
+          if(b.week!=='all'){ col=letters.indexOf(b.week); }
+          else { while(used.has(free)&&free<cols-1) free++; col=free; used.add(col); free++; }
+          renderBlock(b,di,col,cols,days.length);
+        });
+      });
+    }
   }
+  updateFilterBtn();
 }
+
+function updateFilterBtn(){
+  const btn=document.getElementById('btnWeekFilter');
+  if(!btn) return;
+  btn.textContent = currentFilter==='all' ? 'Toutes semaines' : 'Semaine '+currentFilter;
+}
+document.getElementById('btnWeekFilter').addEventListener('click', ()=>{
+  const opts=['all', ...globalLetters()];
+  let idx=opts.indexOf(currentFilter);
+  if(idx===-1) idx=0;
+  currentFilter=opts[(idx+1)%opts.length];
+  renderAll();
+});
 
 function showHighlight(day,rowStartUnits,rowSpanUnits,totalDays){
   const hl=document.getElementById('dragHighlight');
@@ -158,6 +181,14 @@ function getMetrics(){
   return {rect, colW:rect.width/nDays()};
 }
 function clampDay(v){return Math.max(0,Math.min(nDays()-1,v));}
+
+function autoLetterOnOverlap(newBlock){
+  const overlapping = state.blocks.filter(b=> b.day===newBlock.day && b.rowStart<newBlock.rowStart+newBlock.rowSpan && newBlock.rowStart<b.rowStart+b.rowSpan);
+  if(overlapping.length===0){ newBlock.week='all'; return; }
+  const used=new Set(overlapping.map(b=>b.week).filter(w=>w!=='all'));
+  overlapping.filter(b=>b.week==='all').forEach(b=>{ const l=nextLetter(used); used.add(l); b.week=l; });
+  newBlock.week=nextLetter(used);
+}
 
 function attachBlockInteractions(el,b){
   const top=el.querySelector('.handle.top'), bottom=el.querySelector('.handle.bottom');
@@ -228,6 +259,7 @@ function renderPalette(){
 
 function attachPaletteDrag(el,tmpl){
   el.addEventListener('pointerdown', e=>{
+    if(nRows()===0){ openEditTemplate(tmpl); return; }
     const startX=e.clientX, startY=e.clientY;
     let dragging=false, ghost=null;
     el.setPointerCapture(e.pointerId);
@@ -261,7 +293,9 @@ function attachPaletteDrag(el,tmpl){
         if(x>=0 && y>=0 && x<rect.width && y<rect.height){
           const day=clampDay(Math.floor(x/colW));
           const rowStart=Math.max(0,Math.min(nUnits()-2,Math.round(y/unitPx())));
-          state.blocks.push({id:uid(),day,rowStart,rowSpan:2,week:'all',subject:tmpl.subject,teacher:tmpl.teacher,room:tmpl.room,color:tmpl.color});
+          const nb={id:uid(),day,rowStart,rowSpan:2,week:'all',subject:tmpl.subject,teacher:tmpl.teacher,room:tmpl.room,color:tmpl.color};
+          autoLetterOnOverlap(nb);
+          state.blocks.push(nb);
           persist(); renderAll();
         }
         ghost.remove();
@@ -290,13 +324,23 @@ function buildSwatches(){
     swatchesEl.appendChild(s);
   });
 }
+function buildWeekSeg(current){
+  weekSeg.innerHTML='';
+  const opts=['all',...ALPHABET.slice(0,6).split('')];
+  opts.forEach(v=>{
+    const b=document.createElement('button');
+    b.dataset.v=v; b.textContent=v==='all'?'Toutes':v;
+    if(v===current) b.classList.add('active');
+    weekSeg.appendChild(b);
+  });
+}
 function openEditBlock(b){
   editTarget={kind:'block',id:b.id};
   document.getElementById('editTitle').textContent='Modifier le cours';
   fSubject.value=b.subject||''; fTeacher.value=b.teacher||''; fRoom.value=b.room||'';
   pickedColor=b.color||COLORS[0]; buildSwatches();
   weekField.style.display='block';
-  [...weekSeg.children].forEach(btn=>btn.classList.toggle('active',btn.dataset.v===b.week));
+  buildWeekSeg(b.week);
   document.getElementById('btnDelete').style.display='flex';
   editOverlay.classList.add('show');
 }
@@ -380,7 +424,9 @@ function renderRowsEditor(){
   });
 }
 document.getElementById('btnAddRow').onclick=()=>{
-  state.config.rows.push({start:'08:00',end:'09:00'});
+  const rows=state.config.rows;
+  const last=rows[rows.length-1];
+  state.config.rows.push({start:last?last.end:'08:00', end:'09:00'});
   renderRowsEditor();
 };
 document.getElementById('btnSettings').onclick=openSettings;
@@ -388,7 +434,7 @@ document.getElementById('btnCloseSettings').onclick=()=>settingsOverlay.classLis
 settingsOverlay.addEventListener('click', e=>{ if(e.target===settingsOverlay) settingsOverlay.classList.remove('show'); });
 document.getElementById('btnApplySettings').onclick=()=>{
   const days=[...document.getElementById('dayToggles').children].filter(c=>c.dataset.active==='1').map(c=>c.dataset.name);
-  if(days.length===0 || state.config.rows.length===0){ alert('Sélectionnez au moins un jour et un créneau.'); return; }
+  if(days.length===0){ alert('Sélectionnez au moins un jour.'); return; }
   state.config.days=days;
   persist(); renderAll();
 };
