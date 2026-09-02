@@ -183,11 +183,23 @@ function getMetrics(){
 function clampDay(v){return Math.max(0,Math.min(nDays()-1,v));}
 
 function autoLetterOnOverlap(newBlock){
-  const overlapping = state.blocks.filter(b=> b.day===newBlock.day && b.rowStart<newBlock.rowStart+newBlock.rowSpan && newBlock.rowStart<b.rowStart+b.rowSpan);
-  if(overlapping.length===0){ newBlock.week='all'; return; }
-  const used=new Set(overlapping.map(b=>b.week).filter(w=>w!=='all'));
-  overlapping.filter(b=>b.week==='all').forEach(b=>{ const l=nextLetter(used); used.add(l); b.week=l; });
-  newBlock.week=nextLetter(used);
+  newBlock.week='all'; newBlock.auto=true;
+}
+function recomputeAutoLetters(){
+  for(let di=0; di<nDays(); di++){
+    const dayBlocks=state.blocks.filter(b=>b.day===di);
+    clusterDayBlocks(dayBlocks).forEach(group=>{
+      if(group.length>1){
+        const used=new Set(group.filter(b=>b.week!=='all').map(b=>b.week));
+        group.filter(b=>b.auto && b.week==='all').forEach(b=>{
+          const l=nextLetter(used); used.add(l); b.week=l;
+        });
+      } else {
+        const b=group[0];
+        if(b.auto && b.week!=='all') b.week='all';
+      }
+    });
+  }
 }
 
 function attachBlockInteractions(el,b){
@@ -229,6 +241,8 @@ function attachBlockInteractions(el,b){
       document.removeEventListener('pointerup',onUp);
       el.classList.remove('dragging');
       hideHighlight();
+      persist();
+      recomputeAutoLetters();
       persist();
       if(!moved && kind==='move'){ openEditBlock(b); }
       renderAll();
@@ -296,6 +310,7 @@ function attachPaletteDrag(el,tmpl){
           const nb={id:uid(),day,rowStart,rowSpan:2,week:'all',subject:tmpl.subject,teacher:tmpl.teacher,room:tmpl.room,color:tmpl.color};
           autoLetterOnOverlap(nb);
           state.blocks.push(nb);
+          recomputeAutoLetters();
           persist(); renderAll();
         }
         ghost.remove();
@@ -325,15 +340,20 @@ function buildSwatches(){
   });
 }
 function buildWeekSeg(current){
-  weekSeg.innerHTML='';
-  const opts=['all',...ALPHABET.slice(0,6).split('')];
-  opts.forEach(v=>{
-    const b=document.createElement('button');
-    b.dataset.v=v; b.textContent=v==='all'?'Toutes':v;
-    if(v===current) b.classList.add('active');
-    weekSeg.appendChild(b);
-  });
+  const isLetter = current && current!=='all';
+  [...weekSeg.children].forEach(b=>b.classList.toggle('active', (b.dataset.v==='all')===!isLetter));
+  const fLetter=document.getElementById('fLetter');
+  fLetter.style.display = isLetter ? 'block':'none';
+  fLetter.value = isLetter ? current : '';
 }
+weekSeg.addEventListener('click', e=>{
+  const btn=e.target.closest('button'); if(!btn) return;
+  [...weekSeg.children].forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const fLetter=document.getElementById('fLetter');
+  if(btn.dataset.v==='letter'){ fLetter.style.display='block'; fLetter.focus(); }
+  else { fLetter.style.display='none'; fLetter.value=''; }
+});
 function openEditBlock(b){
   editTarget={kind:'block',id:b.id};
   document.getElementById('editTitle').textContent='Modifier le cours';
@@ -357,17 +377,18 @@ document.getElementById('btnNewCourse').onclick=()=>{
   const t={id:uid(),subject:'Nouveau cours',teacher:'',room:'',color:COLORS[Math.floor(Math.random()*COLORS.length)]};
   state.templates.push(t); persist(); renderPalette(); openEditTemplate(t);
 };
-weekSeg.addEventListener('click', e=>{
-  const btn=e.target.closest('button'); if(!btn) return;
-  [...weekSeg.children].forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-});
 document.getElementById('btnSave').onclick=()=>{
   const subject=fSubject.value.trim()||'Cours', teacher=fTeacher.value.trim(), room=fRoom.value.trim();
   if(editTarget.kind==='block'){
     const b=state.blocks.find(x=>x.id===editTarget.id);
-    const week=[...weekSeg.children].find(x=>x.classList.contains('active')).dataset.v;
-    Object.assign(b,{subject,teacher,room,color:pickedColor,week});
+    const mode=[...weekSeg.children].find(x=>x.classList.contains('active')).dataset.v;
+    let week='all', auto=true;
+    if(mode==='letter'){
+      const letter=(document.getElementById('fLetter').value||'').trim().toUpperCase().slice(0,1);
+      if(letter){ week=letter; auto=false; }
+    }
+    Object.assign(b,{subject,teacher,room,color:pickedColor,week,auto});
+    recomputeAutoLetters();
   } else {
     const t=state.templates.find(x=>x.id===editTarget.id);
     Object.assign(t,{subject,teacher,room,color:pickedColor});
@@ -378,6 +399,7 @@ document.getElementById('btnSave').onclick=()=>{
 document.getElementById('btnDelete').onclick=()=>{
   if(editTarget.kind==='block') state.blocks=state.blocks.filter(x=>x.id!==editTarget.id);
   else { state.templates=state.templates.filter(x=>x.id!==editTarget.id); renderPalette(); }
+  recomputeAutoLetters();
   persist(); renderAll(); editOverlay.classList.remove('show');
 };
 editOverlay.addEventListener('click', e=>{ if(e.target===editOverlay) editOverlay.classList.remove('show'); });
