@@ -117,6 +117,12 @@ function renderAll(){
     } else {
       const cols=letters.length;
       clusterDayBlocks(dayBlocks).forEach(group=>{
+        if(group.length===1){
+          const b=group[0];
+          if(b.week==='all'){ renderBlock(b,di,0,1,days.length); }
+          else { renderBlock(b,di,letters.indexOf(b.week),cols,days.length); }
+          return;
+        }
         const used=new Set();
         group.filter(b=>b.week!=='all').forEach(b=>used.add(letters.indexOf(b.week)));
         let free=0;
@@ -470,6 +476,29 @@ document.getElementById('btnLoadDefault').onclick=()=>{
 document.getElementById('btnClear').onclick=()=>{
   if(confirm('Effacer tous les cours de la grille actuelle ?')){ state.blocks=[]; persist(); renderAll(); }
 };
+document.getElementById('btnExport').onclick=()=>{
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='emploi-du-temps.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+};
+document.getElementById('btnImport').onclick=()=>document.getElementById('fileImport').click();
+document.getElementById('fileImport').addEventListener('change', e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const data=JSON.parse(reader.result);
+      if(!data.config || !data.blocks){ alert('Fichier invalide.'); return; }
+      state=data; persist(); renderAll(); renderPalette();
+      settingsOverlay.classList.remove('show');
+    }catch(err){ alert('Impossible de lire ce fichier JSON.'); }
+  };
+  reader.readAsText(file);
+  e.target.value='';
+});
 
 /* ===== INIT ===== */
 renderPalette();
